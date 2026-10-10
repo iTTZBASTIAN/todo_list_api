@@ -2,12 +2,13 @@
 from datetime import datetime
 from typing import Literal, Optional
 
-from fastapi import APIRouter, Depends, Query, Response, status as http_status
+from fastapi import APIRouter, Depends, Query, Request, Response, status as http_status
 from sqlalchemy.orm import Session
 
 from app.dependencies.auth_dependency import get_current_active_user
 from app.dependencies.database_dependency import get_db
 from app.dependencies.todo_dependency import get_owned_todo_or_404
+from app.middlewares.rate_limit import limiter
 from app.models.todo_model import Todo
 from app.models.user_model import User
 from app.schemas.todo_schema import (
@@ -25,7 +26,9 @@ router = APIRouter()  # Debe llamarse 'router'
 
 
 @router.post("", response_model=TodoResponse, status_code=http_status.HTTP_201_CREATED)
+@limiter.limit("20/minute")
 def crear_todo(
+    request: Request,
     data: TodoCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
@@ -34,7 +37,9 @@ def crear_todo(
 
 
 @router.get("", response_model=TodoPage)
+@limiter.limit("60/minute")
 def listar_todos(
+    request: Request,
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=50),
     status: Optional[Status] = None,

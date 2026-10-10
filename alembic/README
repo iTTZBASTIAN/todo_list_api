@@ -1,0 +1,2 @@
+Configuración de Alembic para una sola base de datos (SQLite).
+Comandos: alembic revision --autogenerate -m "mensaje" | alembic upgrade head | alembic current

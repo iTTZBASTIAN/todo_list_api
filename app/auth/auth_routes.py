@@ -1,9 +1,38 @@
 # app/auth/auth_routes.py
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, status
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.orm import Session
 
-# Crear la instancia del router (¡debe llamarse 'router'!)
-router = APIRouter()
+from app.auth import auth_service
+from app.auth.security import create_access_token
+from app.dependencies.auth_dependency import get_current_active_user
+from app.dependencies.database_dependency import get_db
+from app.models.user_model import User
+from app.schemas.auth_schema import RegisterResponse, Token
+from app.schemas.user_schema import UserCreate, UserResponse
 
-@router.post("/login")
-def login():
-    return {"mensaje": "Inicio de sesión"}
+router = APIRouter()  # Debe llamarse 'router'
+
+
+@router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
+def register(data: UserCreate, db: Session = Depends(get_db)):
+    user = auth_service.register_user(db, data)
+    return RegisterResponse(
+        user=UserResponse.model_validate(user),
+        access_token=create_access_token(user.id),
+    )
+
+
+@router.post("/login", response_model=Token)
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+):
+    # OAuth2PasswordRequestForm usa el campo 'username' para el correo
+    user = auth_service.authenticate_user(db, form_data.username, form_data.password)
+    return Token(access_token=create_access_token(user.id))
+
+
+@router.get("/me", response_model=UserResponse)
+def me(current_user: User = Depends(get_current_active_user)):
+    return current_user

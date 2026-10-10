@@ -75,3 +75,17 @@ python -m scripts.promover_admin correo@dominio.com
 Parámetros de `GET /todos`: `page`, `limit` (1 a 50), `status`, `priority`,
 `category_id`, `search`, `due_before`, `sort_by` (`created_at`, `due_date`,
 `title`, `priority`) y `order` (`asc`, `desc`).
+
+## Seguridad: middleware, CORS y límite de peticiones
+
+- Cada respuesta incluye `X-Request-ID`, `X-Process-Time` y `X-App-Name: todo_list_api`,
+  y la consola registra método, ruta y código de cada petición.
+- CORS permitido solo para `http://localhost:5173` y `http://localhost:3000`.
+- Límites por IP (slowapi), con respuesta 429 `Rate limit exceeded`:
+
+| Ruta | Límite |
+|---|---|
+| POST /auth/login | 5 por minuto |
+| POST /auth/register | 3 por minuto |
+| POST /todos | 20 por minuto |
+| GET /todos | 60 por minuto |

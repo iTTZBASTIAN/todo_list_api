@@ -1,5 +1,9 @@
 from fastapi import FastAPI
 
+# Importar los modelos para que Alembic y SQLAlchemy los registren.
+# Las tablas ya NO se crean aquí: las crean las migraciones (alembic upgrade head).
+from app.models import user_model, category_model, todo_model  # noqa: F401
+
 # Importar los routers
 from app.auth import auth_routes
 from app.routes import category_routes, todo_routes, admin_routes

@@ -56,3 +56,22 @@ Para probar el rol admin, promueve un usuario ya registrado:
 ```bash
 python -m scripts.promover_admin correo@dominio.com
 ```
+
+## Categorías y tareas
+
+| Endpoint | Acceso | Éxito | Descripción |
+|---|---|---|---|
+| POST /categories | Autenticado | 201 | Crea una categoría propia (nombre único por usuario) |
+| GET /categories | Autenticado | 200 | Lista las categorías propias |
+| DELETE /categories/{id} | Dueño | 204 | Elimina la categoría; 409 si tiene tareas |
+| POST /todos | Autenticado | 201 | Crea una tarea del usuario |
+| GET /todos | Autenticado | 200 | Lista paginada con filtros y orden |
+| GET /todos/{id} | Dueño | 200 | Consulta una tarea con su categoría |
+| PUT /todos/{id} | Dueño | 200 | Reemplaza los campos de la tarea |
+| PATCH /todos/{id} | Dueño | 200 | Actualiza solo los campos enviados (400 si va vacío) |
+| DELETE /todos/{id} | Dueño | 204 | Elimina la tarea |
+| GET /admin/todos | Solo admin | 200 | Tareas de todos los usuarios con datos del dueño |
+
+Parámetros de `GET /todos`: `page`, `limit` (1 a 50), `status`, `priority`,
+`category_id`, `search`, `due_before`, `sort_by` (`created_at`, `due_date`,
+`title`, `priority`) y `order` (`asc`, `desc`).
